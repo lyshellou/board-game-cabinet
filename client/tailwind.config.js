@@ -12,7 +12,7 @@ export default {
         border: 'rgba(255,255,255,0.08)',
       },
       fontFamily: {
-        heading: ['"Libre Bodoni"', 'serif'],
+        heading: ['"Playfair Display"', '"Smiley Sans"', 'serif'],
         body: ['"Public Sans"', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },

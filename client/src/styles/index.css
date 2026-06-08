@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Smiley Sans';
+  src: url('/fonts/SmileySans-Oblique.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -37,7 +45,7 @@
   /* Editorial drop cap */
   .drop-cap::first-letter {
     float: left;
-    font-family: 'Libre Bodoni', serif;
+    font-family: 'Playfair Display', 'Smiley Sans', serif;
     font-size: 4em;
     line-height: 0.8;
     padding-right: 0.15em;
@@ -46,7 +54,7 @@
 
   /* Editorial pull quote */
   .pull-quote {
-    font-family: 'Libre Bodoni', serif;
+    font-family: 'Playfair Display', 'Smiley Sans', serif;
     font-size: 1.5em;
     font-style: italic;
     line-height: 1.4;

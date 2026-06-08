@@ -27,12 +27,12 @@ export default function HomePage() {
 
         <div className="max-w-page mx-auto w-full">
           <div className="max-w-2xl">
-            <p className="font-mono text-xs text-accent tracking-[0.2em] uppercase mb-4">
+            <p className="font-mono text-xs text-accent tracking-[0.2em] uppercase mb-8">
               个人桌面游戏收藏
             </p>
-            <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl leading-[0.95] text-white mb-6">
+            <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl leading-[1.0] text-white mb-10">
               每张桌子
-              <br />
+              {/* <br /> */}
               <span className="text-accent">都是一个世界</span>
             </h1>
             <p className="text-muted text-lg leading-relaxed max-w-lg mb-8">
