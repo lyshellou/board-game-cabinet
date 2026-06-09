@@ -1,14 +1,14 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { useFeatured } from '../hooks/useGames';
 import GameCard from '../components/game/GameCard';
 import { ChevronRight } from 'lucide-react';
 
 const categories = [
-  { name: '策略', desc: '深度思考与资源规划', count: '—' },
-  { name: '聚会', desc: '社交互动与欢乐', count: '—' },
-  { name: '合作', desc: '并肩作战的乐趣', count: '—' },
-  { name: '抽象', desc: '极简规则，无限深度', count: '—' },
-  { name: '角色扮演', desc: '沉浸叙事冒险', count: '—' },
+  { name: '策略', desc: '深度思考与资源规划', count: '...' },
+  { name: '聚会', desc: '社交互动与欢乐', count: '...' },
+  { name: '合作', desc: '并肩作战的乐趣', count: '...' },
+  { name: '抽象', desc: '极简规则，无限深度', count: '...' },
+  { name: '角色扮演', desc: '沉浸叙事冒险', count: '...' },
 ];
 
 export default function HomePage() {
@@ -27,13 +27,12 @@ export default function HomePage() {
 
         <div className="max-w-page mx-auto w-full">
           <div className="max-w-2xl">
-            <p className="font-mono text-xs text-accent tracking-[0.2em] uppercase mb-8">
-              个人桌面游戏收藏
+            <p className="font-mono text-xs text-accent tracking-[0.2em] uppercase mb-8 ml-4">
+              Board Game Collection Showcase
             </p>
-            <h1 className="font-heading text-5xl sm:text-6xl lg:text-7xl leading-[1.0] text-white mb-10">
-              每张桌子
-              {/* <br /> */}
-              <span className="text-accent">都是一个世界</span>
+            <h1 className="font-heading text-7xl sm:text-8xl lg:text-9xl leading-[1.0] text-white mb-10">
+              <div className="leading-tight">每张桌子</div>
+              <div className="mt-4 text-accent">都是一个世界</div>
             </h1>
             <p className="text-muted text-lg leading-relaxed max-w-lg mb-8">
               精选桌游收藏，记录每一款游戏的独特魅力——从策略深度到聚会欢笑，从两人对弈到众乐时光。

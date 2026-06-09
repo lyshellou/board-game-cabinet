@@ -18,6 +18,44 @@
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(217, 119, 6, 0.18), transparent 35%),
+      radial-gradient(circle at 80% 65%, rgba(21, 128, 61, 0.14), transparent 40%),
+      radial-gradient(circle at 45% 90%, rgba(217, 119, 6, 0.10), transparent 30%),
+      #0F172A;
+    background-attachment: fixed;
+  }
+
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::before {
+    width: 320px;
+    height: 320px;
+    top: -80px;
+    right: -100px;
+    background: rgba(217, 119, 6, 0.25);
+    filter: blur(60px);
+  }
+
+  body::after {
+    width: 220px;
+    height: 220px;
+    bottom: -50px;
+    left: -50px;
+    background: rgba(21, 128, 61, 0.16);
+    filter: blur(50px);
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
   }
 
   ::selection {
