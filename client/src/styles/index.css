@@ -10,47 +10,86 @@
   font-display: swap;
 }
 
+@keyframes ambient-flow {
+  0% {
+    transform: translate3d(-5%, -3%, 0) rotate(-4deg) scale(1.02);
+    background-position: 0% 12%;
+    opacity: 0.56;
+  }
+  50% {
+    transform: translate3d(5%, 3%, 0) rotate(5deg) scale(1.08);
+    background-position: 100% 88%;
+    opacity: 0.82;
+  }
+  100% {
+    transform: translate3d(-3%, 5%, 0) rotate(-2deg) scale(1.05);
+    background-position: 24% 100%;
+    opacity: 0.68;
+  }
+}
+
+@keyframes ambient-drift {
+  0% {
+    transform: translate3d(4%, -3%, 0) rotate(0deg) scale(1.02);
+    background-position: 0% 0%;
+  }
+  50% {
+    transform: translate3d(-5%, 4%, 0) rotate(10deg) scale(1.08);
+    background-position: 100% 50%;
+  }
+  100% {
+    transform: translate3d(4%, -3%, 0) rotate(0deg) scale(1.02);
+    background-position: 0% 100%;
+  }
+}
+
 @layer base {
   * {
     box-sizing: border-box;
   }
 
   body {
+    position: relative;
+    min-height: 100vh;
+    margin: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background:
-      radial-gradient(circle at 15% 10%, rgba(217, 119, 6, 0.18), transparent 35%),
-      radial-gradient(circle at 80% 65%, rgba(21, 128, 61, 0.14), transparent 40%),
-      radial-gradient(circle at 45% 90%, rgba(217, 119, 6, 0.10), transparent 30%),
-      #0F172A;
-    background-attachment: fixed;
+    background: #0F172A;
+    isolation: isolate;
   }
 
   body::before,
   body::after {
     content: "";
     position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
+    inset: -12vmax;
     z-index: 0;
+    pointer-events: none;
+    transform: translate3d(0, 0, 0);
+    will-change: transform, opacity, background-position;
   }
 
   body::before {
-    width: 320px;
-    height: 320px;
-    top: -80px;
-    right: -100px;
-    background: rgba(217, 119, 6, 0.25);
-    filter: blur(60px);
+    background:
+      radial-gradient(circle at 16% 18%, rgba(217, 119, 6, 0.42), transparent 26%),
+      radial-gradient(circle at 82% 20%, rgba(245, 158, 11, 0.26), transparent 22%),
+      radial-gradient(circle at 70% 78%, rgba(21, 128, 61, 0.28), transparent 24%),
+      linear-gradient(120deg, rgba(217, 119, 6, 0.20), rgba(245, 158, 11, 0.12), rgba(21, 128, 61, 0.10));
+    background-size: 180% 180%;
+    filter: blur(44px) saturate(140%);
+    opacity: 0.78;
+    animation: ambient-flow 14s ease-in-out infinite alternate;
   }
 
   body::after {
-    width: 220px;
-    height: 220px;
-    bottom: -50px;
-    left: -50px;
-    background: rgba(21, 128, 61, 0.16);
-    filter: blur(50px);
+    background:
+      radial-gradient(circle at 20% 82%, rgba(21, 128, 61, 0.22), transparent 24%),
+      radial-gradient(circle at 88% 66%, rgba(180, 100, 20, 0.24), transparent 22%),
+      linear-gradient(135deg, rgba(255, 248, 240, 0.05), transparent 36%, rgba(255, 248, 240, 0.03));
+    background-size: 190% 190%;
+    filter: blur(34px) saturate(120%);
+    opacity: 0.52;
+    animation: ambient-drift 20s ease-in-out infinite;
   }
 
   #root {
@@ -63,7 +102,6 @@
     color: #fff;
   }
 
-  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
   }
@@ -79,8 +117,14 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after {
+    animation: none;
+  }
+}
+
 @layer components {
-  /* Editorial drop cap */
   .drop-cap::first-letter {
     float: left;
     font-family: 'Playfair Display', 'Smiley Sans', serif;
@@ -90,7 +134,6 @@
     color: #D97706;
   }
 
-  /* Editorial pull quote */
   .pull-quote {
     font-family: 'Playfair Display', 'Smiley Sans', serif;
     font-size: 1.5em;
@@ -102,14 +145,12 @@
     margin: 2rem 0;
   }
 
-  /* Section divider */
   .section-divider {
     height: 1px;
     background: linear-gradient(to right, rgba(255,255,255,0.08), rgba(217,119,6,0.3), rgba(255,255,255,0.08));
     border: none;
   }
 
-  /* Card hover lift */
   .card-lift {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
@@ -118,7 +159,6 @@
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
   }
 
-  /* Reveal on scroll animation */
   .reveal {
     opacity: 0;
     transform: translateY(24px);
@@ -129,7 +169,6 @@
     transform: translateY(0);
   }
 
-  /* Difficulty dots */
   .difficulty-dot {
     width: 8px;
     height: 8px;
