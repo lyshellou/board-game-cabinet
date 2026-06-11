@@ -162,7 +162,7 @@ export default function AdminPage() {
       <div className="pt-24 pb-16 px-6 min-h-screen flex items-center justify-center">
         <div className="w-full max-w-sm">
           <h1 className="font-heading text-3xl text-white text-center mb-8">管理后台</h1>
-          <form onSubmit={handleLogin} className="bg-surface border border-border rounded-lg p-6 space-y-4">
+          <form onSubmit={handleLogin} className="bg-surface/50 backdrop-blur-xl border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] rounded-lg p-6 space-y-4">
             <div>
               <label className="text-xs text-muted uppercase tracking-wider block mb-2">管理员密码</label>
               <input
@@ -222,7 +222,7 @@ export default function AdminPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-surface border border-border rounded-lg overflow-hidden">
+          <div className="bg-surface/50 backdrop-blur-xl border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] rounded-lg overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-muted text-xs uppercase tracking-wider">

@@ -68,7 +68,7 @@ export default function FilterBar({
 
       {/* Expanded filters */}
       {expanded && (
-        <div className="bg-surface border border-border rounded-lg p-4 space-y-4">
+        <div className="bg-surface/50 backdrop-blur-xl border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] rounded-lg p-4 space-y-4">
           {/* Category */}
           <div>
             <label className="text-xs text-muted uppercase tracking-wider mb-2 block">分类</label>

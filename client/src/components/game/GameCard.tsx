@@ -29,7 +29,7 @@ export default function GameCard({ game, featured }: GameCardProps) {
   return (
     <Link
       to={`/game/${game.id}`}
-      className={`group block bg-surface rounded-lg overflow-hidden border border-border card-lift ${
+      className={`group block bg-surface/50 backdrop-blur-xl rounded-lg overflow-hidden border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] card-lift ${
         featured ? 'md:col-span-2 md:row-span-2' : ''
       }`}
     >

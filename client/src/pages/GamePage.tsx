@@ -65,7 +65,7 @@ export default function GamePage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Left: Image */}
           <div>
-            <div className="aspect-[4/3] rounded-lg overflow-hidden bg-surface border border-border">
+            <div className="aspect-[4/3] rounded-lg overflow-hidden bg-surface/50 backdrop-blur-xl border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
               {game.image ? (
                 <img
                   src={game.image}
@@ -100,21 +100,21 @@ export default function GamePage() {
 
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-surface border border-border rounded-lg p-4">
+              <div className="bg-surface/50 backdrop-blur-xl border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] rounded-lg p-4">
                 <div className="flex items-center gap-2 text-muted mb-1">
                   <Users size={14} />
                   <span className="text-xs uppercase tracking-wider">人数</span>
                 </div>
                 <p className="font-mono text-white text-lg">{playerRange}</p>
               </div>
-              <div className="bg-surface border border-border rounded-lg p-4">
+              <div className="bg-surface/50 backdrop-blur-xl border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] rounded-lg p-4">
                 <div className="flex items-center gap-2 text-muted mb-1">
                   <Clock size={14} />
                   <span className="text-xs uppercase tracking-wider">人均时长</span>
                 </div>
                 <p className="font-mono text-white text-lg">{game.duration_per_player} 分钟</p>
               </div>
-              <div className="bg-surface border border-border rounded-lg p-4">
+              <div className="bg-surface/50 backdrop-blur-xl border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] rounded-lg p-4">
                 <div className="flex items-center gap-2 text-muted mb-1">
                   <Brain size={14} />
                   <span className="text-xs uppercase tracking-wider">难度</span>
@@ -126,7 +126,7 @@ export default function GamePage() {
                   <span className="font-mono text-xs text-muted ml-1">{game.difficulty}</span>
                 </div>
               </div>
-              <div className="bg-surface border border-border rounded-lg p-4">
+              <div className="bg-surface/50 backdrop-blur-xl border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] rounded-lg p-4">
                 <div className="flex items-center gap-2 text-muted mb-1">
                   <Calendar size={14} />
                   <span className="text-xs uppercase tracking-wider">出版</span>

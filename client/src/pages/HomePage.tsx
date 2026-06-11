@@ -103,7 +103,7 @@ export default function HomePage() {
               <Link
                 key={cat.name}
                 to={`/gallery?category=${cat.name}`}
-                className="group bg-surface border border-border rounded-lg p-5 hover:border-accent/30 transition-all duration-300"
+                className="group bg-surface/50 backdrop-blur-xl border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] rounded-lg p-5 hover:border-accent/40 hover:scale-[1.02] transition-all duration-500"
               >
                 <h3 className="font-heading text-lg text-white group-hover:text-accent transition-colors">
                   {cat.name}
