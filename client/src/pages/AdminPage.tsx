@@ -367,7 +367,7 @@ export default function AdminPage() {
                     type="number"
                     min={0}
                     max={5}
-                    step={0.5}
+                    step={0.01}
                     value={form.difficulty}
                     onChange={(e) => setForm({ ...form, difficulty: Number(e.target.value) })}
                     className="w-full bg-bg border border-border rounded-lg px-3 py-2.5 text-white text-sm outline-none focus:border-accent/50"

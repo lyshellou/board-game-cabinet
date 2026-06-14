@@ -125,26 +125,6 @@
 }
 
 @layer components {
-  .drop-cap::first-letter {
-    float: left;
-    font-family: 'Playfair Display', 'Smiley Sans', serif;
-    font-size: 4em;
-    line-height: 0.88;
-    padding-right: 0.18em;
-    color: #D97706;
-  }
-
-  .pull-quote {
-    font-family: 'Playfair Display', 'Smiley Sans', serif;
-    font-size: 1.5em;
-    font-style: italic;
-    line-height: 1.4;
-    color: #D97706;
-    border-left: 3px solid #D97706;
-    padding-left: 1.5rem;
-    margin: 2rem 0;
-  }
-
   .section-divider {
     height: 1px;
     background: linear-gradient(to right, rgba(255,255,255,0.08), rgba(217,119,6,0.3), rgba(255,255,255,0.08));
