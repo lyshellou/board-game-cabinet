@@ -188,7 +188,7 @@ export default function GamePage() {
             {/* Description — under info cards in right column */}
             <section className="pt-4">
               <h2 className="font-heading text-lg text-white mb-3">玩法介绍</h2>
-              <p className="text-muted leading-relaxed text-[15px]">
+              <p className="text-muted leading-relaxed text-[15px] whitespace-pre-line">
                 {game.description}
               </p>
             </section>
@@ -202,7 +202,7 @@ export default function GamePage() {
         {game.review && (
           <section>
             <h2 className="font-heading text-xl text-white mb-4">我的评价</h2>
-            <blockquote className="text-muted leading-relaxed text-[15px] border-l-2 border-accent/30 pl-5 italic">
+            <blockquote className="text-muted leading-relaxed text-[15px] border-l-2 border-accent/30 pl-5 italic whitespace-pre-line">
               {game.review}
             </blockquote>
           </section>
