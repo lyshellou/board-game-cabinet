@@ -3,6 +3,7 @@ export interface BoardGame {
   name: string;
   name_en: string;
   image: string;
+  cover_image: string;
   description: string;
   player_count_min: number;
   player_count_max: number;
@@ -19,6 +20,7 @@ export interface BoardGameInput {
   name: string;
   name_en: string;
   image: string;
+  cover_image: string;
   description: string;
   player_count_min: number;
   player_count_max: number;

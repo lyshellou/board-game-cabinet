@@ -5,6 +5,7 @@ export interface BoardGameRow {
   name: string;
   name_en: string;
   image: string;
+  cover_image: string;
   description: string;
   player_count_min: number;
   player_count_max: number;
@@ -79,6 +80,7 @@ export interface CreateGameInput {
   name: string;
   name_en?: string;
   image?: string;
+  cover_image?: string;
   description?: string;
   player_count_min?: number;
   player_count_max?: number;
@@ -93,13 +95,14 @@ export interface CreateGameInput {
 export function createGame(input: CreateGameInput): BoardGameRow {
   const db = getDb();
   const stmt = db.prepare(`
-    INSERT INTO board_games (name, name_en, image, description, player_count_min, player_count_max, duration_per_player, difficulty, rating, review, category, published_year)
-    VALUES (@name, @name_en, @image, @description, @player_count_min, @player_count_max, @duration_per_player, @difficulty, @rating, @review, @category, @published_year)
+    INSERT INTO board_games (name, name_en, image, cover_image, description, player_count_min, player_count_max, duration_per_player, difficulty, rating, review, category, published_year)
+    VALUES (@name, @name_en, @image, @cover_image, @description, @player_count_min, @player_count_max, @duration_per_player, @difficulty, @rating, @review, @category, @published_year)
   `);
   const result = stmt.run({
     name: input.name,
     name_en: input.name_en ?? '',
     image: input.image ?? '',
+    cover_image: input.cover_image ?? '',
     description: input.description ?? '',
     player_count_min: input.player_count_min ?? 1,
     player_count_max: input.player_count_max ?? 4,
@@ -122,6 +125,7 @@ export function updateGame(id: number, input: Partial<CreateGameInput>): BoardGa
     name: input.name ?? existing.name,
     name_en: input.name_en ?? existing.name_en,
     image: input.image ?? existing.image,
+    cover_image: input.cover_image ?? existing.cover_image,
     description: input.description ?? existing.description,
     player_count_min: input.player_count_min ?? existing.player_count_min,
     player_count_max: input.player_count_max ?? existing.player_count_max,
@@ -135,7 +139,7 @@ export function updateGame(id: number, input: Partial<CreateGameInput>): BoardGa
 
   const stmt = db.prepare(`
     UPDATE board_games SET
-      name = @name, name_en = @name_en, image = @image, description = @description,
+      name = @name, name_en = @name_en, image = @image, cover_image = @cover_image, description = @description,
       player_count_min = @player_count_min, player_count_max = @player_count_max,
       duration_per_player = @duration_per_player, difficulty = @difficulty,
       rating = @rating, review = @review, category = @category, published_year = @published_year

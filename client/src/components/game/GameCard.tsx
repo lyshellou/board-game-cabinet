@@ -35,9 +35,9 @@ export default function GameCard({ game, featured }: GameCardProps) {
     >
       {/* Image */}
       <div className="aspect-[4/3] overflow-hidden bg-surface">
-        {game.image ? (
+        {game.cover_image || game.image ? (
           <img
-            src={game.image}
+            src={game.cover_image || game.image}
             alt={game.name}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"

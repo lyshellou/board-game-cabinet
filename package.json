@@ -3,16 +3,17 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "dev:server": "cd server && node --experimental-sqlite --watch --import tsx src/index.ts",
+    "dev:server": "cd server && node --env-file=../.env --experimental-sqlite --watch --import tsx src/index.ts",
     "dev:client": "cd client && npx vite",
     "build": "cd client && npx vite build",
-    "start": "cd server && node --experimental-sqlite --import tsx src/index.ts",
-    "seed": "cd server && node --experimental-sqlite --import tsx src/db/seed.ts"
+    "start": "cd server && node --env-file=../.env --experimental-sqlite --import tsx src/index.ts",
+    "seed": "cd server && node --env-file=../.env --experimental-sqlite --import tsx src/db/seed.ts"
   },
   "devDependencies": {
     "concurrently": "^10.0.3"
   },
   "dependencies": {
-    "@fontpkg/smiley-sans": "^2.0.4"
+    "@fontpkg/smiley-sans": "^2.0.4",
+    "react-image-crop": "^11.0.10"
   }
 }

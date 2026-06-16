@@ -29,6 +29,7 @@ export function initDb(): void {
       name TEXT NOT NULL,
       name_en TEXT NOT NULL DEFAULT '',
       image TEXT NOT NULL DEFAULT '',
+      cover_image TEXT NOT NULL DEFAULT '',
       description TEXT NOT NULL DEFAULT '',
       player_count_min INTEGER NOT NULL DEFAULT 1,
       player_count_max INTEGER NOT NULL DEFAULT 4,
@@ -41,4 +42,11 @@ export function initDb(): void {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )
   `);
+
+  // Migration: add cover_image column if it doesn't exist (for existing DBs)
+  try {
+    database.exec(`ALTER TABLE board_games ADD COLUMN cover_image TEXT NOT NULL DEFAULT ''`);
+  } catch {
+    // Column already exists — safe to ignore
+  }
 }

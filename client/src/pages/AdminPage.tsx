@@ -11,11 +11,13 @@ import {
   adminUploadImage,
 } from '../lib/api';
 import { Plus, Edit, Trash2, LogOut, Upload, X, Save, Image } from 'lucide-react';
+import ImageCropper from '../components/admin/ImageCropper';
 
 const emptyForm: BoardGameInput = {
   name: '',
   name_en: '',
   image: '',
+  cover_image: '',
   description: '',
   player_count_min: 2,
   player_count_max: 4,
@@ -37,6 +39,7 @@ export default function AdminPage() {
   const [editingGame, setEditingGame] = useState<BoardGame | null>(null);
   const [form, setForm] = useState<BoardGameInput>({ ...emptyForm });
   const [uploading, setUploading] = useState(false);
+  const [croppingFile, setCroppingFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
@@ -78,6 +81,7 @@ export default function AdminPage() {
       name: game.name,
       name_en: game.name_en,
       image: game.image,
+      cover_image: game.cover_image,
       description: game.description,
       player_count_min: game.player_count_min,
       player_count_max: game.player_count_max,
@@ -92,19 +96,38 @@ export default function AdminPage() {
     setModalOpen(true);
   };
 
-  // Image upload
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Image upload — opens cropper first
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setCroppingFile(file);
+    // Reset input so the same file can be re-selected
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  // Crop confirmed — upload original (image) + cropped (cover_image)
+  const handleCropConfirm = async (croppedBlob: Blob) => {
+    const originalFile = croppingFile!;
+    setCroppingFile(null);
     setUploading(true);
     try {
-      const { url } = await adminUploadImage(file);
-      setForm((prev) => ({ ...prev, image: url }));
+      // 1. Upload cropped as cover_image
+      const croppedFile = new File([croppedBlob], `cover_${Date.now()}.jpg`, { type: 'image/jpeg' });
+      const { url: coverUrl } = await adminUploadImage(croppedFile);
+
+      // 2. Upload original as image
+      const { url: imageUrl } = await adminUploadImage(originalFile);
+
+      setForm((prev) => ({ ...prev, image: imageUrl, cover_image: coverUrl }));
     } catch {
       setError('图片上传失败');
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleCropCancel = () => {
+    setCroppingFile(null);
   };
 
   // Save
@@ -453,20 +476,30 @@ export default function AdminPage() {
                     onChange={handleImageUpload}
                     className="hidden"
                   />
-                  {form.image && (
-                    <div className="flex items-center gap-2 bg-bg rounded-lg px-3 py-2 border border-border">
-                      <Image size={14} className="text-accent" />
-                      <span className="text-xs text-muted truncate max-w-[200px]">{form.image}</span>
-                      <button
-                        type="button"
-                        onClick={() => setForm({ ...form, image: '' })}
-                        className="text-muted hover:text-red-400"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
                 </div>
+                {/* Original image */}
+                {form.image && (
+                  <div className="flex items-center gap-2 mt-2 bg-bg rounded-lg px-3 py-2 border border-border">
+                    <Image size={14} className="text-accent" />
+                    <span className="text-[10px] text-muted shrink-0">原图：</span>
+                    <span className="text-xs text-muted truncate">{form.image.split('/').pop()}</span>
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, image: '', cover_image: '' })}
+                      className="text-muted hover:text-red-400 ml-auto"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+                {/* Cover image */}
+                {form.cover_image && (
+                  <div className="flex items-center gap-2 mt-1 bg-bg rounded-lg px-3 py-2 border border-border">
+                    <Image size={14} className="text-primary" />
+                    <span className="text-[10px] text-muted shrink-0">封面：</span>
+                    <span className="text-xs text-muted truncate">{form.cover_image.split('/').pop()}</span>
+                  </div>
+                )}
               </div>
 
               {/* Submit */}
@@ -489,6 +522,15 @@ export default function AdminPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Image Cropper */}
+      {croppingFile && (
+        <ImageCropper
+          file={croppingFile}
+          onCrop={handleCropConfirm}
+          onCancel={handleCropCancel}
+        />
       )}
     </div>
   );

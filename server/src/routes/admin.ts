@@ -30,10 +30,12 @@ router.get('/games', (_req: AuthRequest, res: Response) => {
 router.post('/games', upload.single('image'), (req: AuthRequest, res: Response) => {
   const body = req.body;
   const image = req.file ? `/uploads/${req.file.filename}` : (body.image || '');
+  const cover_image = body.cover_image || '';
   const game = createGame({
     name: body.name,
     name_en: body.name_en,
     image,
+    cover_image,
     description: body.description,
     player_count_min: body.player_count_min ? Number(body.player_count_min) : undefined,
     player_count_max: body.player_count_max ? Number(body.player_count_max) : undefined,
@@ -64,6 +66,7 @@ router.put('/games/:id', upload.single('image'), (req: AuthRequest, res: Respons
   if (body.name !== undefined) updateData.name = body.name;
   if (body.name_en !== undefined) updateData.name_en = body.name_en;
   if (image !== undefined) updateData.image = image;
+  if (body.cover_image !== undefined) updateData.cover_image = body.cover_image;
   if (body.description !== undefined) updateData.description = body.description;
   if (body.player_count_min !== undefined) updateData.player_count_min = Number(body.player_count_min);
   if (body.player_count_max !== undefined) updateData.player_count_max = Number(body.player_count_max);
