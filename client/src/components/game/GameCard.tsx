@@ -68,10 +68,13 @@ export default function GameCard({ game, featured }: GameCardProps) {
         <div className="flex items-center gap-4 text-xs text-muted">
           <span>{playerRange}</span>
           <span>人均{game.duration_per_player}′</span>
-          <span className="flex gap-0.5">
-            {difficultyDots(game.difficulty).map((state, i) => (
-              <span key={i} className={`difficulty-dot ${state}`} />
-            ))}
+          <span className="flex items-center gap-1">
+            <span className="opacity-60">难度</span>
+            <span className="flex gap-0.5">
+              {difficultyDots(game.difficulty).map((state, i) => (
+                <span key={i} className={`difficulty-dot ${state}`} />
+              ))}
+            </span>
           </span>
         </div>
 
