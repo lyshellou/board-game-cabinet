@@ -113,11 +113,15 @@ export default function GamePage() {
 
           {/* Right: Info (~60%) */}
           <div className="lg:w-[60%] space-y-5">
-            {/* Category tag */}
-            {game.category && (
-              <span className="inline-block text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
-                {game.category}
-              </span>
+            {/* Category tags */}
+            {game.category && game.category.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {game.category.map((cat) => (
+                  <span key={cat} className="inline-block text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
+                    {cat}
+                  </span>
+                ))}
+              </div>
             )}
 
             {/* Chinese name */}

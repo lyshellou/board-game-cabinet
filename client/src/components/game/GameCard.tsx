@@ -78,10 +78,14 @@ export default function GameCard({ game, featured }: GameCardProps) {
           </span>
         </div>
 
-        {game.category && (
-          <span className="inline-block text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
-            {game.category}
-          </span>
+        {game.category && game.category.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {game.category.map((cat) => (
+              <span key={cat} className="inline-block text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
+                {cat}
+              </span>
+            ))}
+          </div>
         )}
       </div>
     </Link>

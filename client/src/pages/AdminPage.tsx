@@ -25,7 +25,7 @@ const emptyForm: BoardGameInput = {
   difficulty: 2.5,
   rating: 7.0,
   review: '',
-  category: '',
+  category: [] as string[],
   published_year: new Date().getFullYear(),
 };
 
@@ -42,6 +42,7 @@ export default function AdminPage() {
   const [croppingFile, setCroppingFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [tagInput, setTagInput] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Login
@@ -71,6 +72,7 @@ export default function AdminPage() {
   const openCreate = () => {
     setEditingGame(null);
     setForm({ ...emptyForm, published_year: new Date().getFullYear() });
+    setTagInput('');
     setError('');
     setModalOpen(true);
   };
@@ -92,6 +94,7 @@ export default function AdminPage() {
       category: game.category,
       published_year: game.published_year,
     });
+    setTagInput('');
     setError('');
     setModalOpen(true);
   };
@@ -130,6 +133,21 @@ export default function AdminPage() {
     setCroppingFile(null);
   };
 
+  const addCategoryTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && tagInput.trim()) {
+      e.preventDefault();
+      const tag = tagInput.trim();
+      if (!form.category.includes(tag)) {
+        setForm({ ...form, category: [...form.category, tag] });
+      }
+      setTagInput('');
+    }
+  };
+
+  const removeCategoryTag = (tag: string) => {
+    setForm({ ...form, category: form.category.filter((t) => t !== tag) });
+  };
+
   // Save
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
@@ -142,7 +160,7 @@ export default function AdminPage() {
 
     const formData = new FormData();
     Object.entries(form).forEach(([key, value]) => {
-      formData.append(key, String(value));
+      formData.append(key, Array.isArray(value) ? JSON.stringify(value) : String(value));
     });
 
     try {
@@ -265,11 +283,13 @@ export default function AdminPage() {
                       {game.name_en && <span className="text-muted text-xs ml-2">{game.name_en}</span>}
                     </td>
                     <td className="py-3 px-4 hidden sm:table-cell">
-                      {game.category && (
-                        <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
-                          {game.category}
-                        </span>
-                      )}
+                      <div className="flex flex-wrap gap-1">
+                        {game.category?.map((cat) => (
+                          <span key={cat} className="text-[10px] uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
+                            {cat}
+                          </span>
+                        ))}
+                      </div>
                     </td>
                     <td className="py-3 px-4 text-center text-muted hidden md:table-cell">
                       {game.player_count_min === game.player_count_max
@@ -423,10 +443,28 @@ export default function AdminPage() {
 
               <div>
                 <label className="text-xs text-muted uppercase tracking-wider block mb-1.5">分类</label>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {form.category.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 text-xs"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeCategoryTag(tag)}
+                        className="text-primary/60 hover:text-primary"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
                 <input
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  placeholder="如：策略、聚会、合作"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={addCategoryTag}
+                  placeholder="输入分类后按回车添加"
                   className="w-full bg-bg border border-border rounded-lg px-3 py-2.5 text-white text-sm outline-none focus:border-accent/50"
                 />
               </div>

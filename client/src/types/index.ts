@@ -11,7 +11,7 @@ export interface BoardGame {
   difficulty: number;
   rating: number;
   review: string;
-  category: string;
+  category: string[];
   published_year: number;
   created_at: string;
 }
@@ -28,7 +28,7 @@ export interface BoardGameInput {
   difficulty: number;
   rating: number;
   review: string;
-  category: string;
+  category: string[];
   published_year: number;
 }
 

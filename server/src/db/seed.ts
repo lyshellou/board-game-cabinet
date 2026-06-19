@@ -13,7 +13,7 @@ const seedGames = [
     difficulty: 2.5,
     rating: 8.5,
     review: '现代桌游的入门神作。贸易环节充满互动与戏剧性，每一局都因骰子和谈判而不同。缺点是初始布局对胜负影响较大。',
-    category: '策略',
+    category: '["策略"]',
     published_year: 1995,
   },
   {
@@ -27,7 +27,7 @@ const seedGames = [
     difficulty: 2.0,
     rating: 8.0,
     review: '简约而不简单。配件质感极佳，规则5分钟学会，但策略深度足够反复钻研。2人对弈体验尤佳。',
-    category: '策略',
+    category: '["策略"]',
     published_year: 2014,
   },
   {
@@ -41,7 +41,7 @@ const seedGames = [
     difficulty: 1.0,
     rating: 9.0,
     review: '聚会的王牌游戏。规则简单到30秒就能教完，但每次玩都能爆发出意想不到的笑料。队长的脑洞和队友的默契是胜负关键。',
-    category: '聚会',
+    category: '["聚会"]',
     published_year: 2015,
   },
   {
@@ -55,7 +55,7 @@ const seedGames = [
     difficulty: 3.0,
     rating: 8.5,
     review: '合作模式让游戏充满紧张感和团队荣誉感。没有"带新人坐牢"的尴尬，反而越苦越有趣。缺点是可能出现一人指挥全队的情况。',
-    category: '合作',
+    category: '["合作"]',
     published_year: 2008,
   },
   {
@@ -69,7 +69,7 @@ const seedGames = [
     difficulty: 2.5,
     rating: 8.0,
     review: '7人局也能30分钟内结束的神奇游戏。轮抽机制让每一手都充满两难抉择。计分方式丰富，但初次玩可能需要消化多种符号系统。',
-    category: '策略',
+    category: '["策略"]',
     published_year: 2010,
   },
   {
@@ -83,7 +83,7 @@ const seedGames = [
     difficulty: 1.5,
     rating: 9.0,
     review: '比狼人杀更纯粹的推理体验。没有玩家淘汰，所有人都能参与全程。梅林与刺客的博弈让每一局都像一场谍战电影。',
-    category: '聚会',
+    category: '["聚会"]',
     published_year: 2012,
   },
   {
@@ -97,7 +97,7 @@ const seedGames = [
     difficulty: 2.5,
     rating: 8.5,
     review: '美工和主题完美融合。翻开每一张鸟牌都像翻开一本自然图鉴。引擎构建的满足感极强，但玩家互动较少，更像各自经营。',
-    category: '策略',
+    category: '["策略"]',
     published_year: 2019,
   },
   {
@@ -111,7 +111,7 @@ const seedGames = [
     difficulty: 2.0,
     rating: 8.0,
     review: '颜值与策略兼具的抽象桌游。配件手感极佳，规则的"你拿了就得帮我处理剩下的"非常巧妙，让每一轮都充满博弈。',
-    category: '抽象',
+    category: '["抽象"]',
     published_year: 2017,
   },
   {
@@ -125,7 +125,7 @@ const seedGames = [
     difficulty: 4.5,
     rating: 9.5,
     review: '桌游界的《艾尔登法环》。内容量巨大，战斗系统精妙，但setup和收纳是巨大挑战。适合有固定车队的重度玩家。',
-    category: '角色扮演',
+    category: '["角色扮演"]',
     published_year: 2017,
   },
   {
@@ -139,7 +139,7 @@ const seedGames = [
     difficulty: 1.0,
     rating: 7.5,
     review: '16张牌能玩出如此丰富的心理博弈，桌游极简主义的巅峰。装在口袋里随时开一局，等餐等车绝佳伴侣。',
-    category: '聚会',
+    category: '["聚会"]',
     published_year: 2012,
   },
 ];

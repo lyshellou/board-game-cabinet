@@ -13,9 +13,43 @@ export interface BoardGameRow {
   difficulty: number;
   rating: number;
   review: string;
-  category: string;
+  category: string; // JSON array in DB
   published_year: number;
   created_at: string;
+}
+
+/** 将 DB 中的 category（JSON 字符串或旧版纯文本）解析为 string[] */
+function parseCategory(raw: string): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    // 兼容旧数据：纯文本如 "策略"
+    return raw ? [raw] : [];
+  }
+}
+
+export interface GameOutput {
+  id: number;
+  name: string;
+  name_en: string;
+  image: string;
+  cover_image: string;
+  description: string;
+  player_count_min: number;
+  player_count_max: number;
+  duration_per_player: number;
+  difficulty: number;
+  rating: number;
+  review: string;
+  category: string[];
+  published_year: number;
+  created_at: string;
+}
+
+function toOutput(row: BoardGameRow): GameOutput {
+  return { ...row, category: parseCategory(row.category) };
 }
 
 export interface GameFilters {
@@ -27,13 +61,14 @@ export interface GameFilters {
   sort?: string;
 }
 
-export function getAllGames(filters: GameFilters = {}): BoardGameRow[] {
+export function getAllGames(filters: GameFilters = {}): GameOutput[] {
   const db = getDb();
   const conditions: string[] = [];
   const params: Record<string, unknown> = {};
 
   if (filters.category) {
-    conditions.push('category = @category');
+    // 匹配 JSON 数组（新数据）或旧版纯文本
+    conditions.push("(category = @category OR category LIKE '%\"' || @category || '\"%')");
     params.category = filters.category;
   }
   if (filters.players !== undefined && filters.players > 0) {
@@ -61,19 +96,22 @@ export function getAllGames(filters: GameFilters = {}): BoardGameRow[] {
   if (filters.sort === 'difficulty') orderBy = 'ORDER BY difficulty ASC';
 
   const stmt = db.prepare(`SELECT * FROM board_games ${where} ${orderBy}`);
-  return stmt.all(params) as BoardGameRow[];
+  const rows = stmt.all(params) as BoardGameRow[];
+  return rows.map(toOutput);
 }
 
-export function getGameById(id: number): BoardGameRow | undefined {
+export function getGameById(id: number): GameOutput | undefined {
   const db = getDb();
   const stmt = db.prepare('SELECT * FROM board_games WHERE id = ?');
-  return stmt.get(id) as BoardGameRow | undefined;
+  const row = stmt.get(id) as BoardGameRow | undefined;
+  return row ? toOutput(row) : undefined;
 }
 
-export function getFeaturedGames(): BoardGameRow[] {
+export function getFeaturedGames(): GameOutput[] {
   const db = getDb();
   const stmt = db.prepare('SELECT * FROM board_games ORDER BY rating DESC LIMIT 4');
-  return stmt.all() as BoardGameRow[];
+  const rows = stmt.all() as BoardGameRow[];
+  return rows.map(toOutput);
 }
 
 export interface CreateGameInput {
@@ -88,11 +126,11 @@ export interface CreateGameInput {
   difficulty?: number;
   rating?: number;
   review?: string;
-  category?: string;
+  category?: string[];
   published_year?: number;
 }
 
-export function createGame(input: CreateGameInput): BoardGameRow {
+export function createGame(input: CreateGameInput): GameOutput {
   const db = getDb();
   const stmt = db.prepare(`
     INSERT INTO board_games (name, name_en, image, cover_image, description, player_count_min, player_count_max, duration_per_player, difficulty, rating, review, category, published_year)
@@ -110,16 +148,20 @@ export function createGame(input: CreateGameInput): BoardGameRow {
     difficulty: input.difficulty ?? 2.0,
     rating: input.rating ?? 5.0,
     review: input.review ?? '',
-    category: input.category ?? '',
+    category: JSON.stringify(input.category ?? []),
     published_year: input.published_year ?? 2020,
   });
   return getGameById(Number(result.lastInsertRowid))!;
 }
 
-export function updateGame(id: number, input: Partial<CreateGameInput>): BoardGameRow | undefined {
+export function updateGame(id: number, input: Partial<CreateGameInput>): GameOutput | undefined {
   const db = getDb();
   const existing = getGameById(id);
   if (!existing) return undefined;
+
+  // 从原始行获取已有的 category 字符串
+  const row = db.prepare('SELECT category FROM board_games WHERE id = ?').get(id) as { category: string } | undefined;
+  const existingCategoryStr = row?.category ?? '[]';
 
   const merged = {
     name: input.name ?? existing.name,
@@ -133,7 +175,7 @@ export function updateGame(id: number, input: Partial<CreateGameInput>): BoardGa
     difficulty: input.difficulty ?? existing.difficulty,
     rating: input.rating ?? existing.rating,
     review: input.review ?? existing.review,
-    category: input.category ?? existing.category,
+    category: input.category !== undefined ? JSON.stringify(input.category) : existingCategoryStr,
     published_year: input.published_year ?? existing.published_year,
   };
 

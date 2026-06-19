@@ -8,6 +8,20 @@ const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'board-game-cabinet-secret-key-2026';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 
+function parseCategoryBody(raw: unknown): string[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw as string[];
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [raw];
+    } catch {
+      return raw ? [raw] : [];
+    }
+  }
+  return [];
+}
+
 // 登录
 router.post('/login', (req: AuthRequest, res: Response) => {
   const { password } = req.body;
@@ -43,7 +57,7 @@ router.post('/games', upload.single('image'), (req: AuthRequest, res: Response) 
     difficulty: body.difficulty ? Number(body.difficulty) : undefined,
     rating: body.rating ? Number(body.rating) : undefined,
     review: body.review,
-    category: body.category,
+    category: parseCategoryBody(body.category),
     published_year: body.published_year ? Number(body.published_year) : undefined,
   });
   res.status(201).json(game);
@@ -74,7 +88,7 @@ router.put('/games/:id', upload.single('image'), (req: AuthRequest, res: Respons
   if (body.difficulty !== undefined) updateData.difficulty = Number(body.difficulty);
   if (body.rating !== undefined) updateData.rating = Number(body.rating);
   if (body.review !== undefined) updateData.review = body.review;
-  if (body.category !== undefined) updateData.category = body.category;
+  if (body.category !== undefined) updateData.category = parseCategoryBody(body.category);
   if (body.published_year !== undefined) updateData.published_year = Number(body.published_year);
 
   const updated = updateGame(id, updateData);

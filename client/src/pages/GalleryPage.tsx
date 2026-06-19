@@ -28,7 +28,7 @@ export default function GalleryPage() {
   // Get unique categories from all games for filter buttons
   const categories = useMemo(() => {
     const cats = new Set<string>();
-    games.forEach((g) => g.category && cats.add(g.category));
+    games.forEach((g) => g.category?.forEach((c) => cats.add(c)));
     return Array.from(cats);
   }, [games]);
 
