@@ -6,7 +6,7 @@ import { getAllGames, getGameById, createGame, updateGame, deleteGame } from '..
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'board-game-cabinet-secret-key-2026';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 function parseCategoryBody(raw: unknown): string[] {
   if (!raw) return [];
