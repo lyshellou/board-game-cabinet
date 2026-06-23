@@ -1,10 +1,26 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useGame } from '../hooks/useGame';
-import { ChevronLeft, Users, Clock, Brain, Calendar, Star } from 'lucide-react';
+import { PlayRecord } from '../types';
+import { fetchGameRecords } from '../lib/api';
+import { ChevronLeft, Users, Clock, Brain, Calendar, Star, Gamepad2 } from 'lucide-react';
 
 export default function GamePage() {
   const { id } = useParams<{ id: string }>();
   const { game, loading } = useGame(Number(id));
+  const [records, setRecords] = useState<PlayRecord[]>([]);
+  const [recordsLoading, setRecordsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    const gameId = Number(id);
+    if (isNaN(gameId)) return;
+    setRecordsLoading(true);
+    fetchGameRecords(gameId)
+      .then(setRecords)
+      .catch(() => {})
+      .finally(() => setRecordsLoading(false));
+  }, [id]);
 
   if (loading) {
     return (
@@ -211,6 +227,63 @@ export default function GamePage() {
             </blockquote>
           </section>
         )}
+
+        {/* Play Records */}
+        <hr className="section-divider my-12" />
+        <section>
+          <h2 className="font-heading text-xl text-white mb-6 flex items-center gap-2">
+            <Gamepad2 size={22} className="text-accent" />
+            游玩记录
+            <span className="text-sm font-mono text-muted font-normal">{records.length} 次</span>
+          </h2>
+
+          {recordsLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-12 bg-surface rounded-lg animate-pulse" />
+              ))}
+            </div>
+          ) : records.length === 0 ? (
+            <div className="bg-surface/30 border border-white/[0.06] rounded-lg px-6 py-10 text-center">
+              <p className="text-muted text-sm">暂无游玩记录</p>
+            </div>
+          ) : (
+            <div className="bg-surface/50 backdrop-blur-sm border border-white/[0.06] rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.06] text-muted text-xs uppercase tracking-wider">
+                    <th className="text-left py-3 px-4">日期</th>
+                    <th className="text-center py-3 px-4">人数</th>
+                    <th className="text-center py-3 px-4">时长</th>
+                    <th className="text-center py-3 px-4 hidden sm:table-cell">比分</th>
+                    <th className="text-left py-3 px-4 hidden md:table-cell">备注</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {records.map((record) => (
+                    <tr key={record.id} className="border-b border-white/[0.06] last:border-0 hover:bg-white/[0.02] transition-colors">
+                      <td className="py-3 px-4 font-mono text-white text-xs">
+                        {record.played_at}
+                      </td>
+                      <td className="py-3 px-4 text-center text-white">
+                        {record.player_count} 人
+                      </td>
+                      <td className="py-3 px-4 text-center text-muted font-mono">
+                        {record.duration_minutes} 分钟
+                      </td>
+                      <td className="py-3 px-4 text-center text-accent font-mono hidden sm:table-cell">
+                        {record.score || '-'}
+                      </td>
+                      <td className="py-3 px-4 text-muted text-xs hidden md:table-cell truncate max-w-[200px]">
+                        {record.notes || '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

@@ -64,7 +64,7 @@ export interface GameFilters {
 export function getAllGames(filters: GameFilters = {}): GameOutput[] {
   const db = getDb();
   const conditions: string[] = [];
-  const params: Record<string, unknown> = {};
+  const params: Record<string, string | number> = {};
 
   if (filters.category) {
     // 匹配 JSON 数组（新数据）或旧版纯文本
@@ -96,21 +96,21 @@ export function getAllGames(filters: GameFilters = {}): GameOutput[] {
   if (filters.sort === 'difficulty') orderBy = 'ORDER BY difficulty ASC';
 
   const stmt = db.prepare(`SELECT * FROM board_games ${where} ${orderBy}`);
-  const rows = stmt.all(params) as BoardGameRow[];
+  const rows = stmt.all(params) as unknown as BoardGameRow[];
   return rows.map(toOutput);
 }
 
 export function getGameById(id: number): GameOutput | undefined {
   const db = getDb();
   const stmt = db.prepare('SELECT * FROM board_games WHERE id = ?');
-  const row = stmt.get(id) as BoardGameRow | undefined;
+  const row = stmt.get(id) as unknown as BoardGameRow | undefined;
   return row ? toOutput(row) : undefined;
 }
 
 export function getFeaturedGames(): GameOutput[] {
   const db = getDb();
   const stmt = db.prepare('SELECT * FROM board_games ORDER BY rating DESC LIMIT 4');
-  const rows = stmt.all() as BoardGameRow[];
+  const rows = stmt.all() as unknown as BoardGameRow[];
   return rows.map(toOutput);
 }
 
@@ -194,6 +194,96 @@ export function updateGame(id: number, input: Partial<CreateGameInput>): GameOut
 export function deleteGame(id: number): boolean {
   const db = getDb();
   const stmt = db.prepare('DELETE FROM board_games WHERE id = ?');
+  const result = stmt.run(id);
+  return result.changes > 0;
+}
+
+// ════════════════════════════════════════════
+// Play Records
+// ════════════════════════════════════════════
+
+export interface PlayRecordRow {
+  id: number;
+  game_id: number;
+  played_at: string;
+  player_count: number;
+  duration_minutes: number;
+  score: string;
+  notes: string;
+  created_at: string;
+}
+
+export interface PlayRecordOutput {
+  id: number;
+  game_id: number;
+  played_at: string;
+  player_count: number;
+  duration_minutes: number;
+  score: string;
+  notes: string;
+  created_at: string;
+}
+
+export interface CreatePlayRecordInput {
+  game_id: number;
+  played_at: string;
+  player_count: number;
+  duration_minutes: number;
+  score?: string;
+  notes?: string;
+}
+
+export function getRecordsByGameId(gameId: number): PlayRecordOutput[] {
+  const db = getDb();
+  const stmt = db.prepare('SELECT * FROM play_records WHERE game_id = ? ORDER BY played_at DESC, created_at DESC');
+  return stmt.all(gameId) as unknown as PlayRecordOutput[];
+}
+
+export function createPlayRecord(input: CreatePlayRecordInput): PlayRecordOutput {
+  const db = getDb();
+  const stmt = db.prepare(`
+    INSERT INTO play_records (game_id, played_at, player_count, duration_minutes, score, notes)
+    VALUES (@game_id, @played_at, @player_count, @duration_minutes, @score, @notes)
+  `);
+  const result = stmt.run({
+    game_id: input.game_id,
+    played_at: input.played_at,
+    player_count: input.player_count,
+    duration_minutes: input.duration_minutes,
+    score: input.score ?? '',
+    notes: input.notes ?? '',
+  });
+  const row = db.prepare('SELECT * FROM play_records WHERE id = ?').get(Number(result.lastInsertRowid)) as PlayRecordOutput | undefined;
+  return row!;
+}
+
+export function updatePlayRecord(id: number, input: Partial<CreatePlayRecordInput>): PlayRecordOutput | undefined {
+  const db = getDb();
+  const existing = db.prepare('SELECT * FROM play_records WHERE id = ?').get(id) as PlayRecordOutput | undefined;
+  if (!existing) return undefined;
+
+  const merged = {
+    game_id: input.game_id ?? existing.game_id,
+    played_at: input.played_at ?? existing.played_at,
+    player_count: input.player_count ?? existing.player_count,
+    duration_minutes: input.duration_minutes ?? existing.duration_minutes,
+    score: input.score ?? existing.score,
+    notes: input.notes ?? existing.notes,
+  };
+
+  const stmt = db.prepare(`
+    UPDATE play_records SET
+      game_id = @game_id, played_at = @played_at, player_count = @player_count,
+      duration_minutes = @duration_minutes, score = @score, notes = @notes
+    WHERE id = @id
+  `);
+  stmt.run({ ...merged, id });
+  return db.prepare('SELECT * FROM play_records WHERE id = ?').get(id) as PlayRecordOutput | undefined;
+}
+
+export function deletePlayRecord(id: number): boolean {
+  const db = getDb();
+  const stmt = db.prepare('DELETE FROM play_records WHERE id = ?');
   const result = stmt.run(id);
   return result.changes > 0;
 }

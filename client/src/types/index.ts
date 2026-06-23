@@ -41,6 +41,17 @@ export interface GameFilters {
   sort?: string;
 }
 
+export interface PlayRecord {
+  id: number;
+  game_id: number;
+  played_at: string;
+  player_count: number;
+  duration_minutes: number;
+  score: string;
+  notes: string;
+  created_at: string;
+}
+
 export interface LoginRequest {
   password: string;
 }

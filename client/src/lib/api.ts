@@ -1,4 +1,4 @@
-import { BoardGame, LoginResponse, GameFilters } from '../types';
+import { BoardGame, LoginResponse, GameFilters, PlayRecord } from '../types';
 
 const API_BASE = '/api';
 
@@ -96,5 +96,54 @@ export async function adminUploadImage(file: File): Promise<{ url: string }> {
     method: 'POST',
     headers: authHeaders(),
     body: formData,
+  });
+}
+
+// ===== Play Records =====
+
+export async function fetchGameRecords(gameId: number): Promise<PlayRecord[]> {
+  return request<PlayRecord[]>(`/games/${gameId}/records`);
+}
+
+export async function adminFetchRecords(gameId: number): Promise<PlayRecord[]> {
+  return request<PlayRecord[]>(`/admin/records?game_id=${gameId}`, {
+    headers: authHeaders(),
+  });
+}
+
+export async function adminCreateRecord(data: {
+  game_id: number;
+  played_at: string;
+  player_count: number;
+  duration_minutes: number;
+  score?: string;
+  notes?: string;
+}): Promise<PlayRecord> {
+  return request<PlayRecord>('/admin/records', {
+    method: 'POST',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function adminUpdateRecord(id: number, data: Partial<{
+  game_id: number;
+  played_at: string;
+  player_count: number;
+  duration_minutes: number;
+  score: string;
+  notes: string;
+}>): Promise<PlayRecord> {
+  return request<PlayRecord>(`/admin/records/${id}`, {
+    method: 'PUT',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function adminDeleteRecord(id: number): Promise<void> {
+  await request(`/admin/records/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
   });
 }

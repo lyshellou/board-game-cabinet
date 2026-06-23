@@ -49,4 +49,26 @@ export function initDb(): void {
   } catch {
     // Column already exists — safe to ignore
   }
+
+  // Play records table
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS play_records (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      game_id INTEGER NOT NULL,
+      played_at TEXT NOT NULL DEFAULT (date('now')),
+      player_count INTEGER NOT NULL DEFAULT 2,
+      duration_minutes INTEGER NOT NULL DEFAULT 60,
+      score TEXT NOT NULL DEFAULT '',
+      notes TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (game_id) REFERENCES board_games(id) ON DELETE CASCADE
+    )
+  `);
+
+  // Migration: add score column if missing (for existing DBs that had old schema)
+  try {
+    database.exec(`ALTER TABLE play_records ADD COLUMN score TEXT NOT NULL DEFAULT ''`);
+  } catch {
+    // Column already exists — safe to ignore
+  }
 }

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getAllGames, getGameById, getFeaturedGames } from '../db/queries.js';
+import { getAllGames, getGameById, getFeaturedGames, getRecordsByGameId } from '../db/queries.js';
 
 const router = Router();
 
@@ -33,6 +33,17 @@ router.get('/:id', (req: Request, res: Response) => {
     return;
   }
   res.json(game);
+});
+
+// 获取游戏的游玩记录
+router.get('/:id/records', (req: Request, res: Response) => {
+  const gameId = Number(req.params.id);
+  if (isNaN(gameId)) {
+    res.status(400).json({ error: '无效的游戏 ID' });
+    return;
+  }
+  const records = getRecordsByGameId(gameId);
+  res.json(records);
 });
 
 export default router;

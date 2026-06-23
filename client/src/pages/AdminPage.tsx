@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent, useRef } from 'react';
-import { BoardGame, BoardGameInput } from '../types';
+import { BoardGame, BoardGameInput, PlayRecord } from '../types';
 import {
   getToken,
   clearToken,
@@ -9,8 +9,12 @@ import {
   adminUpdateGame,
   adminDeleteGame,
   adminUploadImage,
+  adminFetchRecords,
+  adminCreateRecord,
+  adminUpdateRecord,
+  adminDeleteRecord,
 } from '../lib/api';
-import { Plus, Edit, Trash2, LogOut, Upload, X, Save, Image } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Upload, X, Save, Image, Gamepad2, History } from 'lucide-react';
 import ImageCropper from '../components/admin/ImageCropper';
 
 const emptyForm: BoardGameInput = {
@@ -44,6 +48,23 @@ export default function AdminPage() {
   const [error, setError] = useState('');
   const [tagInput, setTagInput] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Play records state
+  const [recordsModalOpen, setRecordsModalOpen] = useState(false);
+  const [recordsGame, setRecordsGame] = useState<BoardGame | null>(null);
+  const [records, setRecords] = useState<PlayRecord[]>([]);
+  const [recordsLoading, setRecordsLoading] = useState(false);
+  const [recordFormOpen, setRecordFormOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<PlayRecord | null>(null);
+  const [recordForm, setRecordForm] = useState({
+    played_at: new Date().toISOString().slice(0, 10),
+    player_count: 2,
+    duration_minutes: 60,
+    score: '',
+    notes: '',
+  });
+  const [recordSaving, setRecordSaving] = useState(false);
+  const [recordError, setRecordError] = useState('');
 
   // Login
   const handleLogin = async (e: FormEvent) => {
@@ -197,6 +218,93 @@ export default function AdminPage() {
     setGames([]);
   };
 
+  // ===== Play Records =====
+  const openRecords = async (game: BoardGame) => {
+    setRecordsGame(game);
+    setRecords([]);
+    setRecordError('');
+    setRecordsModalOpen(true);
+    setRecordsLoading(true);
+    try {
+      const data = await adminFetchRecords(game.id);
+      setRecords(data);
+    } catch {
+      setRecordError('加载记录失败');
+    } finally {
+      setRecordsLoading(false);
+    }
+  };
+
+  const closeRecords = () => {
+    setRecordsModalOpen(false);
+    setRecordsGame(null);
+    setRecords([]);
+    setRecordFormOpen(false);
+    setEditingRecord(null);
+  };
+
+  const openRecordCreate = () => {
+    setEditingRecord(null);
+    setRecordForm({
+      played_at: new Date().toISOString().slice(0, 10),
+      player_count: 2,
+      duration_minutes: 60,
+      score: '',
+      notes: '',
+    });
+    setRecordError('');
+    setRecordFormOpen(true);
+  };
+
+  const openRecordEdit = (record: PlayRecord) => {
+    setEditingRecord(record);
+    setRecordForm({
+      played_at: record.played_at,
+      player_count: record.player_count,
+      duration_minutes: record.duration_minutes,
+      score: record.score,
+      notes: record.notes,
+    });
+    setRecordError('');
+    setRecordFormOpen(true);
+  };
+
+  const handleRecordSave = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!recordsGame) return;
+    setRecordSaving(true);
+    setRecordError('');
+
+    try {
+      if (editingRecord) {
+        const updated = await adminUpdateRecord(editingRecord.id, recordForm);
+        setRecords((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+      } else {
+        const created = await adminCreateRecord({
+          ...recordForm,
+          game_id: recordsGame.id,
+        });
+        setRecords((prev) => [created, ...prev]);
+      }
+      setRecordFormOpen(false);
+      setEditingRecord(null);
+    } catch (err: unknown) {
+      setRecordError(err instanceof Error ? err.message : '保存失败');
+    } finally {
+      setRecordSaving(false);
+    }
+  };
+
+  const handleRecordDelete = async (record: PlayRecord) => {
+    if (!confirm(`确定要删除 ${record.played_at} 的游玩记录吗？`)) return;
+    try {
+      await adminDeleteRecord(record.id);
+      setRecords((prev) => prev.filter((r) => r.id !== record.id));
+    } catch {
+      setRecordError('删除失败');
+    }
+  };
+
   // ===== LOGIN VIEW =====
   if (!token) {
     return (
@@ -304,6 +412,13 @@ export default function AdminPage() {
                     </td>
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => openRecords(game)}
+                          className="p-2 text-muted hover:text-accent transition-colors"
+                          title="游玩记录"
+                        >
+                          <Gamepad2 size={15} />
+                        </button>
                         <button
                           onClick={() => openEdit(game)}
                           className="p-2 text-muted hover:text-white transition-colors"
@@ -555,6 +670,191 @@ export default function AdminPage() {
                   className="flex items-center gap-2 bg-accent text-bg font-medium px-6 py-2.5 rounded-lg hover:bg-accent/90 transition-colors text-sm disabled:opacity-50"
                 >
                   <Save size={14} /> {saving ? '保存中...' : '保存'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===== PLAY RECORDS MODAL ===== */}
+      {recordsModalOpen && recordsGame && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 overflow-y-auto">
+          <div className="fixed inset-0 bg-black/60" onClick={closeRecords} />
+          <div className="relative bg-surface border border-border rounded-lg w-full max-w-2xl p-6 mb-20">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-heading text-xl text-white flex items-center gap-2">
+                <History size={20} className="text-accent" />
+                游玩记录 · {recordsGame.name}
+              </h2>
+              <button onClick={closeRecords} className="text-muted hover:text-white">
+                <X size={20} />
+              </button>
+            </div>
+
+            {recordError && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2 text-red-400 text-xs mb-4">
+                {recordError}
+              </div>
+            )}
+
+            {/* Add button */}
+            <button
+              onClick={openRecordCreate}
+              className="flex items-center gap-2 bg-accent text-bg font-medium px-4 py-2 rounded-lg hover:bg-accent/90 transition-colors text-sm mb-4"
+            >
+              <Plus size={14} /> 新增记录
+            </button>
+
+            {/* Records list */}
+            {recordsLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-12 bg-surface rounded-lg animate-pulse" />
+                ))}
+              </div>
+            ) : records.length === 0 ? (
+              <div className="bg-bg/50 border border-border rounded-lg px-4 py-10 text-center">
+                <p className="text-muted text-sm">暂无游玩记录</p>
+              </div>
+            ) : (
+              <div className="bg-bg/50 border border-border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-muted text-xs uppercase tracking-wider">
+                      <th className="text-left py-2.5 px-3">日期</th>
+                      <th className="text-center py-2.5 px-3">人数</th>
+                      <th className="text-center py-2.5 px-3">时长</th>
+                      <th className="text-center py-2.5 px-3 hidden sm:table-cell">比分</th>
+                      <th className="text-left py-2.5 px-3 hidden md:table-cell">备注</th>
+                      <th className="text-right py-2.5 px-3">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {records.map((record) => (
+                      <tr key={record.id} className="border-b border-border last:border-0 hover:bg-white/[0.02] transition-colors">
+                        <td className="py-2.5 px-3 font-mono text-white text-xs">{record.played_at}</td>
+                        <td className="py-2.5 px-3 text-center text-white">{record.player_count} 人</td>
+                        <td className="py-2.5 px-3 text-center text-muted font-mono">{record.duration_minutes} 分钟</td>
+                        <td className="py-2.5 px-3 text-center text-accent font-mono hidden sm:table-cell">{record.score || '-'}</td>
+                        <td className="py-2.5 px-3 text-muted text-xs hidden md:table-cell truncate max-w-[150px]">{record.notes || '-'}</td>
+                        <td className="py-2.5 px-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => openRecordEdit(record)}
+                              className="p-1.5 text-muted hover:text-white transition-colors"
+                              title="编辑"
+                            >
+                              <Edit size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleRecordDelete(record)}
+                              className="p-1.5 text-muted hover:text-red-400 transition-colors"
+                              title="删除"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ===== RECORD FORM MODAL ===== */}
+      {recordFormOpen && (
+        <div className="fixed inset-0 z-[60] flex items-start justify-center pt-32 px-4 overflow-y-auto">
+          <div className="fixed inset-0 bg-black/60" onClick={() => setRecordFormOpen(false)} />
+          <div className="relative bg-surface border border-border rounded-lg w-full max-w-md p-6 mb-20">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-heading text-lg text-white">
+                {editingRecord ? '编辑游玩记录' : '新增游玩记录'}
+              </h3>
+              <button onClick={() => setRecordFormOpen(false)} className="text-muted hover:text-white">
+                <X size={20} />
+              </button>
+            </div>
+
+            {recordError && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2 text-red-400 text-xs mb-4">
+                {recordError}
+              </div>
+            )}
+
+            <form onSubmit={handleRecordSave} className="space-y-4">
+              <div>
+                <label className="text-xs text-muted uppercase tracking-wider block mb-1.5">游玩日期 *</label>
+                <input
+                  type="date"
+                  value={recordForm.played_at}
+                  onChange={(e) => setRecordForm({ ...recordForm, played_at: e.target.value })}
+                  className="w-full bg-bg border border-border rounded-lg px-3 py-2.5 text-white text-sm outline-none focus:border-accent/50"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-muted uppercase tracking-wider block mb-1.5">游玩人数 *</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={99}
+                    value={recordForm.player_count}
+                    onChange={(e) => setRecordForm({ ...recordForm, player_count: Number(e.target.value) })}
+                    className="w-full bg-bg border border-border rounded-lg px-3 py-2.5 text-white text-sm outline-none focus:border-accent/50"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-muted uppercase tracking-wider block mb-1.5">时长（分钟）*</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={recordForm.duration_minutes}
+                    onChange={(e) => setRecordForm({ ...recordForm, duration_minutes: Number(e.target.value) })}
+                    className="w-full bg-bg border border-border rounded-lg px-3 py-2.5 text-white text-sm outline-none focus:border-accent/50"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-muted uppercase tracking-wider block mb-1.5">比分 / 结果</label>
+                <input
+                  value={recordForm.score}
+                  onChange={(e) => setRecordForm({ ...recordForm, score: e.target.value })}
+                  placeholder="例如：张三 42:38 李四"
+                  className="w-full bg-bg border border-border rounded-lg px-3 py-2.5 text-white text-sm outline-none focus:border-accent/50"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-muted uppercase tracking-wider block mb-1.5">感受 / 备注</label>
+                <textarea
+                  rows={3}
+                  value={recordForm.notes}
+                  onChange={(e) => setRecordForm({ ...recordForm, notes: e.target.value })}
+                  placeholder="今天玩得怎么样？"
+                  className="w-full bg-bg border border-border rounded-lg px-3 py-2.5 text-white text-sm outline-none focus:border-accent/50 resize-y"
+                />
+              </div>
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setRecordFormOpen(false)}
+                  className="px-4 py-2.5 text-sm text-muted hover:text-white transition-colors"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  disabled={recordSaving}
+                  className="flex items-center gap-2 bg-accent text-bg font-medium px-6 py-2.5 rounded-lg hover:bg-accent/90 transition-colors text-sm disabled:opacity-50"
+                >
+                  <Save size={14} /> {recordSaving ? '保存中...' : '保存'}
                 </button>
               </div>
             </form>

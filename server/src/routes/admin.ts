@@ -2,7 +2,7 @@ import { Router, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
-import { getAllGames, getGameById, createGame, updateGame, deleteGame } from '../db/queries.js';
+import { getAllGames, getGameById, createGame, updateGame, deleteGame, getRecordsByGameId, createPlayRecord, updatePlayRecord, deletePlayRecord } from '../db/queries.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'board-game-cabinet-secret-key-2026';
@@ -116,6 +116,78 @@ router.post('/upload', upload.single('image'), (req: AuthRequest, res: Response)
     return;
   }
   res.json({ url: `/uploads/${req.file.filename}` });
+});
+
+// ════════════════════════════════════════════
+// Play Records — Admin
+// ════════════════════════════════════════════
+
+// 获取某游戏的游玩记录
+router.get('/records', (req: AuthRequest, res: Response) => {
+  const gameId = Number(req.query.game_id);
+  if (isNaN(gameId)) {
+    res.status(400).json({ error: '缺少有效的 game_id 参数' });
+    return;
+  }
+  const records = getRecordsByGameId(gameId);
+  res.json(records);
+});
+
+// 新增游玩记录
+router.post('/records', (req: AuthRequest, res: Response) => {
+  const { game_id, played_at, player_count, duration_minutes, score, notes } = req.body;
+  if (!game_id || !played_at || !player_count || !duration_minutes) {
+    res.status(400).json({ error: '缺少必填字段 (game_id, played_at, player_count, duration_minutes)' });
+    return;
+  }
+  const record = createPlayRecord({
+    game_id: Number(game_id),
+    played_at,
+    player_count: Number(player_count),
+    duration_minutes: Number(duration_minutes),
+    score: score || '',
+    notes: notes || '',
+  });
+  res.status(201).json(record);
+});
+
+// 编辑游玩记录
+router.put('/records/:id', (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  if (isNaN(id)) {
+    res.status(400).json({ error: '无效的记录 ID' });
+    return;
+  }
+  const { game_id, played_at, player_count, duration_minutes, score, notes } = req.body;
+  const updateData: Record<string, unknown> = {};
+  if (game_id !== undefined) updateData.game_id = Number(game_id);
+  if (played_at !== undefined) updateData.played_at = played_at;
+  if (player_count !== undefined) updateData.player_count = Number(player_count);
+  if (duration_minutes !== undefined) updateData.duration_minutes = Number(duration_minutes);
+  if (score !== undefined) updateData.score = score;
+  if (notes !== undefined) updateData.notes = notes;
+
+  const updated = updatePlayRecord(id, updateData);
+  if (!updated) {
+    res.status(404).json({ error: '记录不存在' });
+    return;
+  }
+  res.json(updated);
+});
+
+// 删除游玩记录
+router.delete('/records/:id', (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  if (isNaN(id)) {
+    res.status(400).json({ error: '无效的记录 ID' });
+    return;
+  }
+  const success = deletePlayRecord(id);
+  if (!success) {
+    res.status(404).json({ error: '记录不存在' });
+    return;
+  }
+  res.json({ success: true });
 });
 
 export default router;
