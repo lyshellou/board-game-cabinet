@@ -95,7 +95,7 @@ export default function HomePage() {
       {/* Categories */}
       <section className="px-6 py-16">
         <div className="max-w-page mx-auto">
-          <p className="font-mono text-xs text-accent tracking-[0.2em] uppercase mb-2">按分类探索</p>
+          <p className="font-mono text-xs text-accent tracking-[0.2em] uppercase mb-2">PICK WHAT YOU LIKE</p>
           <h2 className="font-heading text-3xl text-white mb-8">找到你的类型</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
