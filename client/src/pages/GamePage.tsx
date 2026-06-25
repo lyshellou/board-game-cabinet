@@ -221,7 +221,7 @@ export default function GamePage() {
         {/* Review — spans full page width, aligns with image left and info right */}
         {game.review && (
           <section>
-            <h2 className="font-heading text-xl text-white mb-4">我的评价</h2>
+            <h2 className="font-heading text-xl text-white mb-4">大佬评价</h2>
             <blockquote className="text-muted leading-relaxed text-[15px] border-l-2 border-accent/30 pl-5 italic whitespace-pre-line">
               {game.review}
             </blockquote>
